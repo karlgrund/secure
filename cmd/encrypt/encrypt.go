@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//var publicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDFf4Ol/RCDrdX2iLkfUcJKqQ0qDtrlLhgszNzqnHK53mvZ+8hkN9gPey97MSo8okT9bF7hkpE4tNKuCA8t/+qoFz8MMIOo4J30r2frsQbmdGhLq4uVjHUDEZCCfwbcWjG/+QkMl43n+mWrbqeCAWD2p10a+mUud4gq5L5a3OG/k0jNkwKh7gbF7xRiw3v3k5WwnOmARPe70UbGo7Db6NXXsZFf54aeE05jVWQHNZPVAN5WXzqVbzEKxI2Eyy/yx3nzCCZTh03l/uFNCCmLrZnnT7YZ0sPABbPgkbWLfraBFvmoI9TTLZSA56gOx35qRdgtA9fE0Kqn1gZ6uVevMo/Gu3ACSkdrHszaNjbxtbSiDfirAoYL7rzTuWgsXi1hHE4yAU5xdtU63mF0Eeus3VCbdp/JDTbiCOJBoL0dIvGRel1Oq3NsgoUEBQ+85PKjElahwE4Ll0vnE83Z+lI8zJjF+27x3vEZDBmtzIbTq4HniaLgS+6Fi6CpQMsAukGp8CD6xMXg7HxXkVna1+Kuy0SzF7w8/AsvFYPQ/ZK3/IuXGyDQug/qh3Vc38xr2XHQek0KEwTxBC61/080/SuSlbjMBBR15DpjszU5jP+Ukx+ddwgwuVFn2TgsvEO50exmAiHIsnXSM1zGi/LKp+9yUuqlc+ERFvHU7X/fULAo6ClcFw== johan.karlgrund@izettle.com"
-
 type encryption struct {
 	fileToEncrypt string
 	publicKey     string
@@ -44,8 +42,15 @@ func Encrypt() *cobra.Command {
 			"public key used to encrypt",
 		)
 
-	cmd.MarkFlagRequired("publicKey")
-	cmd.MarkFlagRequired("file")
+	err := cmd.MarkFlagRequired("publicKey")
+	if err != nil {
+		fmt.Printf("%s", err)
+	}
+
+	err = cmd.MarkFlagRequired("file")
+	if err != nil {
+		fmt.Printf("%s", err)
+	}
 
 	return cmd
 }
@@ -56,7 +61,7 @@ func (e *encryption) run() {
 
 	secretKey, cipherblock := enc.GenerateKeyAndCipherBlock(32)
 
-	ciphertext := enc.EncryptUsingAsymmetricKey([]byte(fileToEncrypt), cipherblock)
+	ciphertext := enc.EncryptUsingAsymmetricKey(fileToEncrypt, cipherblock)
 
 	encSecretKey := enc.EncryptUsingPublicKey(secretKey, publicKey)
 

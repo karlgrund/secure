@@ -64,7 +64,7 @@ func (e *decryption) run() {
 
 	pkPassword := getPkPassword()
 
-	unecryptedSecret := dec.DecryptUsingPrivateKey(secretKey, privateKey, string(pkPassword))
+	unecryptedSecret := dec.DecryptUsingPrivateKey(secretKey, privateKey, pkPassword)
 
 	clearText := dec.DecryptUsingAsymmetricKey(fileToDecrypt, unecryptedSecret)
 

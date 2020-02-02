@@ -10,9 +10,7 @@ import (
 )
 
 // DecryptUsingPrivateKey decrypt using private key
-func DecryptUsingPrivateKey(toDecrypt []byte, pKey []byte, pkPassword string) []byte {
-	//var err error
-
+func DecryptUsingPrivateKey(toDecrypt, pKey []byte, pkPassword string) []byte {
 	privateKeyPem, _ := pem.Decode([]byte(string(pKey)))
 	var decPrivateKey []byte
 	if pkPassword == "" {
@@ -29,7 +27,7 @@ func DecryptUsingPrivateKey(toDecrypt []byte, pKey []byte, pkPassword string) []
 }
 
 // DecryptUsingAsymmetricKey is decrypting the inbyte bytearray using the asymmetric key
-func DecryptUsingAsymmetricKey(toDecrypt []byte, asymmetricKey []byte) []byte {
+func DecryptUsingAsymmetricKey(toDecrypt, asymmetricKey []byte) []byte {
 	secKey, _ := aes.NewCipher(asymmetricKey)
 	aesgcm2, _ := cipher.NewGCM(secKey)
 	clearText, _ := aesgcm2.Open(nil, make([]byte, 12), toDecrypt, nil)

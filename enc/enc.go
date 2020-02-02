@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
+	"fmt"
 
 	"github.com/ssh-vault/ssh2pem"
 )
@@ -13,7 +14,10 @@ import (
 // and an aes cipher.block
 func GenerateKeyAndCipherBlock(size int) ([]byte, cipher.Block) {
 	key := make([]byte, size)
-	rand.Read(key)
+	_, err := rand.Read(key)
+	if err != nil {
+		fmt.Printf("%s", err)
+	}
 
 	generatedKey, _ := aes.NewCipher(key)
 
@@ -31,7 +35,7 @@ func EncryptUsingAsymmetricKey(toEncrypt []byte, asymmetricKey cipher.Block) []b
 }
 
 // EncryptUsingPublicKey encrypt using public key
-func EncryptUsingPublicKey(toEncrypt []byte, publicKey []byte) []byte {
+func EncryptUsingPublicKey(toEncrypt, publicKey []byte) []byte {
 	decodedPubKey, _ := ssh2pem.DecodePublicKey(string(publicKey))
 
 	encrypted, _ := rsa.EncryptPKCS1v15(rand.Reader, decodedPubKey.(*rsa.PublicKey), toEncrypt)
