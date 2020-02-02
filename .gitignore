@@ -6,6 +6,7 @@
 *.so
 *.dylib
 dist/
+secure
 
 # Test binary, built with `go test -c`
 *.test
