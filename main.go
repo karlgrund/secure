@@ -25,8 +25,8 @@ func NewRootCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(version.NewCmd())
-	cmd.AddCommand(encrypt.NewCmd())
-	cmd.AddCommand(decrypt.NewCmd())
+	cmd.AddCommand(encrypt.Encrypt())
+	cmd.AddCommand(decrypt.Decrypt())
 
 	return cmd
 }
