@@ -1,26 +1,33 @@
 package dec
 
 import (
+	"fmt"
+
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // DecryptUsingPrivateKey decrypt using private key
-func DecryptUsingPrivateKey(toDecrypt, pKey []byte, pkPassword string) []byte {
-	privateKeyPem, _ := pem.Decode([]byte(string(pKey)))
-	var decPrivateKey []byte
-	if pkPassword == "" {
-		decPrivateKey = privateKeyPem.Bytes
+func DecryptUsingPrivateKey(toDecrypt, pKey []byte, askPass bool) []byte {
+	var privateKey *rsa.PrivateKey
+	if askPass {
+		pkPassword := getPkPassword()
+
+		privateKeyPem, _ := pem.Decode(pKey)
+		decPrivateKey, _ := x509.DecryptPEMBlock(privateKeyPem, []byte(pkPassword))
+
+		privateKey, _ = x509.ParsePKCS1PrivateKey(decPrivateKey)
 	} else {
-		decPrivateKey, _ = x509.DecryptPEMBlock(privateKeyPem, []byte(pkPassword))
+		pk, _ := ssh.ParseRawPrivateKey(pKey)
+		privateKey = pk.(*rsa.PrivateKey)
 	}
-
-	privateKey, _ := x509.ParsePKCS1PrivateKey(decPrivateKey)
-
 	unecryptedSecret, _ := rsa.DecryptPKCS1v15(rand.Reader, privateKey, toDecrypt)
 
 	return unecryptedSecret
@@ -33,4 +40,11 @@ func DecryptUsingAsymmetricKey(toDecrypt, asymmetricKey []byte) []byte {
 	clearText, _ := aesgcm2.Open(nil, make([]byte, 12), toDecrypt, nil)
 
 	return clearText
+}
+
+// getPkPassword asks the user to enter the password for their private key.
+func getPkPassword() string {
+	fmt.Println("Enter password: ")
+	pkPassword, _ := terminal.ReadPassword(0)
+	return string(pkPassword)
 }

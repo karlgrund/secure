@@ -7,13 +7,13 @@ import (
 
 	"github.com/pypl-johan/secure/dec"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 type decryption struct {
 	fileToDecrypt string
 	privateKey    string
 	secretKey     string
+	askPass       bool
 }
 
 // Decrypt allows decryption of symmetric key using private key
@@ -52,6 +52,12 @@ func Decrypt() *cobra.Command {
 			"secret.key.enc",
 			"secret key to decrypt",
 		)
+	cmd.Flags().BoolVar(
+		&decrypt.askPass,
+		"askPass",
+		false,
+		"ask for password for private key",
+	)
 
 	return cmd
 }
@@ -62,20 +68,11 @@ func (e *decryption) run() {
 	secretKey, _ := ioutil.ReadFile(e.secretKey)
 	fileToDecrypt, _ := ioutil.ReadFile(e.fileToDecrypt)
 
-	pkPassword := getPkPassword()
-
-	unecryptedSecret := dec.DecryptUsingPrivateKey(secretKey, privateKey, pkPassword)
+	unecryptedSecret := dec.DecryptUsingPrivateKey(secretKey, privateKey, e.askPass)
 
 	clearText := dec.DecryptUsingAsymmetricKey(fileToDecrypt, unecryptedSecret)
 
 	writeToFile(clearText, "secret.txt")
-}
-
-// getPkPassword asks the user to enter the password for their private key.
-func getPkPassword() string {
-	fmt.Println("Enter password: ")
-	pkPassword, _ := terminal.ReadPassword(0)
-	return string(pkPassword)
 }
 
 // writeToFile writes the data to a file with name fileName
