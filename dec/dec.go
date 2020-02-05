@@ -2,6 +2,7 @@ package dec
 
 import (
 	"fmt"
+	"strings"
 
 	"crypto/aes"
 	"crypto/cipher"
@@ -15,18 +16,18 @@ import (
 )
 
 // DecryptUsingPrivateKey decrypt using private key
-func DecryptUsingPrivateKey(toDecrypt, pKey []byte, askPass bool) []byte {
+func DecryptUsingPrivateKey(toDecrypt, pKey []byte) []byte {
 	var privateKey *rsa.PrivateKey
-	if askPass {
+	if strings.Contains(string(pKey), "OPENSSH") {
+		pk, _ := ssh.ParseRawPrivateKey(pKey)
+		privateKey = pk.(*rsa.PrivateKey)
+	} else {
 		pkPassword := getPkPassword()
 
 		privateKeyPem, _ := pem.Decode(pKey)
 		decPrivateKey, _ := x509.DecryptPEMBlock(privateKeyPem, []byte(pkPassword))
 
 		privateKey, _ = x509.ParsePKCS1PrivateKey(decPrivateKey)
-	} else {
-		pk, _ := ssh.ParseRawPrivateKey(pKey)
-		privateKey = pk.(*rsa.PrivateKey)
 	}
 	unecryptedSecret, _ := rsa.DecryptPKCS1v15(rand.Reader, privateKey, toDecrypt)
 

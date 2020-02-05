@@ -13,7 +13,6 @@ type decryption struct {
 	fileToDecrypt string
 	privateKey    string
 	secretKey     string
-	askPass       bool
 }
 
 // Decrypt allows decryption of symmetric key using private key
@@ -52,12 +51,6 @@ func Decrypt() *cobra.Command {
 			"secret.key.enc",
 			"secret key to decrypt",
 		)
-	cmd.Flags().BoolVar(
-		&decrypt.askPass,
-		"askPass",
-		false,
-		"ask for password for private key",
-	)
 
 	return cmd
 }
@@ -68,7 +61,7 @@ func (e *decryption) run() {
 	secretKey, _ := ioutil.ReadFile(e.secretKey)
 	fileToDecrypt, _ := ioutil.ReadFile(e.fileToDecrypt)
 
-	unecryptedSecret := dec.DecryptUsingPrivateKey(secretKey, privateKey, e.askPass)
+	unecryptedSecret := dec.DecryptUsingPrivateKey(secretKey, privateKey)
 
 	clearText := dec.DecryptUsingAsymmetricKey(fileToDecrypt, unecryptedSecret)
 
